@@ -37,6 +37,18 @@ function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth event:', event, session?.user?.email);
+
+        const now = Date.now();
+        const eventKey = `${event}-${session?.user?.email || 'no-user'}`;
+        
+        // Prevent duplicate events within 2 seconds
+        if (lastEventRef.current === eventKey && (now - lastEventTimeRef.current) < 2000) {
+          console.log('Skipping duplicate event:', event);
+          return;
+        }
+        
+        lastEventRef.current = eventKey;
+        lastEventTimeRef.current = now;
         
         if (event === 'SIGNED_IN') {
           // Show success toast only
