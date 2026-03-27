@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';  // ← Added useRef
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
@@ -31,6 +31,8 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
+  const lastEventRef = useRef(null);      // ← Added this
+  const lastEventTimeRef = useRef(0);     // ← Added this
   
   useEffect(() => {
     // Listen for auth state changes
@@ -52,7 +54,7 @@ function App() {
         
         if (event === 'SIGNED_IN') {
           // Show success toast only
-          toast.success('Sign-in succesful');
+          toast.success('Sign-in successful');
           // Let the ProtectedRoute handle navigation
         } else if (event === 'SIGNED_OUT') {
           toast.success('Logged out successfully');
