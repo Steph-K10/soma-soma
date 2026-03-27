@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';  // ← Added useRef
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
@@ -29,10 +29,12 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/" replace />;
 };
 
-function App() {
+// Inner component that has access to useLocation
+const AppContent = () => {
+  const location = useLocation();
   const [isInitialized, setIsInitialized] = useState(false);
-  const lastEventRef = useRef(null);      // ← Added this
-  const lastEventTimeRef = useRef(0);     // ← Added this
+  const lastEventRef = useRef(null);      
+  const lastEventTimeRef = useRef(0);
   
   useEffect(() => {
     // Listen for auth state changes
@@ -53,9 +55,10 @@ function App() {
         lastEventTimeRef.current = now;
         
         if (event === 'SIGNED_IN') {
-          // Show success toast only
-          toast.success('Sign-in successful');
-          // Let the ProtectedRoute handle navigation
+          // Only show toast if not on landing page
+          if (location.pathname !== '/') {
+            toast.success('Sign-in successful');
+          }
         } else if (event === 'SIGNED_OUT') {
           toast.success('Logged out successfully');
         }
@@ -64,11 +67,10 @@ function App() {
       }
     );
 
-    // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [location.pathname]);
 
   if (!isInitialized) {
     return (
@@ -79,7 +81,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <>
       <Toaster 
         position="top-right"
         toastOptions={{
@@ -106,11 +108,8 @@ function App() {
       />
       
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
-
-        {/* Protected Routes (require authentication) */}
         <Route 
           path="/dashboard" 
           element={
@@ -119,10 +118,16 @@ function App() {
             </ProtectedRoute>
           } 
         />
-
-        {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+    </>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
