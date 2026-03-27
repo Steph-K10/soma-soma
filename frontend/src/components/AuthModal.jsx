@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
+  const [isGmail, setIsGmail] = useState(false);
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -36,51 +37,107 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
+            data: {
             username: username,
             full_name: username,
-          },
-          emailRedirectTo: `${window.location.origin}/verify-email`,
+            },
+            emailRedirectTo: `${window.location.origin}/verify-email`,
         },
-      });
-      
-      if (error) throw error;
-      
-      if (data.user) {
+        });
+        
+        if (error) throw error;
+        
+        if (data.user) {
         setShowVerificationMessage(true);
         toast.success('Check your email for verification link!');
-      }
+        }
     } catch (error) {
-      toast.error(error.message);
-      console.error(error);
+        console.error('Signup error:', error);
+        
+        if (error.message?.includes('already registered with Google')) {
+        toast.error(
+            'This email is already linked to a Google account. Please use "Sign in with Google".',
+            { duration: 5000 }
+        );
+        
+        const googleBtn = document.getElementById('google-signin-button');
+        if (googleBtn) {
+            googleBtn.classList.add('ring-2', 'ring-pink-500', 'scale-105', 'shadow-lg');
+            setTimeout(() => {
+            googleBtn.classList.remove('ring-2', 'ring-pink-500', 'scale-105', 'shadow-lg');
+            }, 3000);
+        }
+        } else if (error.message?.includes('already registered') || 
+                error.message?.includes('already exists')) {
+        toast.error('An account with this email already exists. Please log in instead.');
+        } else {
+        toast.error(error.message || 'Signup failed. Please try again.');
+        }
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
+
+  const handleEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    
+    // Detect if email is Gmail (including Google Workspace domains)
+    const isGmailDomain = /@gmail\.com$|@googlemail\.com$/.test(newEmail);
+    const hasGmailInAddress = newEmail.includes('@gmail') || newEmail.includes('@googlemail');
+    
+    // Show suggestion if it looks like a Gmail address
+    setIsGmail(isGmailDomain || (hasGmailInAddress && newEmail.length > 5));
+  };
+
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      });
-      
-      if (error) throw error;
-      
-      toast.success('Welcome back!');
-      window.location.href = '/dashboard';
+        });
+        
+        if (error) throw error;
+        
+        toast.success('Welcome back!');
+        window.location.href = '/dashboard';
     } catch (error) {
-      toast.error(error.message);
-      console.error(error);
+        console.error('Login error:', error);
+        
+        // Check if the error is because the user has a Google account
+        if (error.message?.includes('Email not confirmed') || 
+            error.message?.includes('Invalid login credentials')) {
+        toast.error('Invalid email or password. Please try again.');
+        } else if (error.message?.includes('already registered with Google') ||
+                error.message?.includes('user already exists')) {
+        // Special handling for Google account conflict
+        toast.error(
+            'This email is associated with a Google account. Please use "Sign in with Google" instead.',
+            { duration: 5000 }
+        );
+        
+        // Highlight the Google sign-in button to guide the user
+        const googleBtn = document.getElementById('google-signin-button');
+        if (googleBtn) {
+            googleBtn.classList.add('ring-2', 'ring-pink-500', 'scale-105', 'shadow-lg');
+            setTimeout(() => {
+            googleBtn.classList.remove('ring-2', 'ring-pink-500', 'scale-105', 'shadow-lg');
+            }, 3000);
+        }
+        } else {
+        // Generic error
+        toast.error(error.message || 'Login failed. Please try again.');
+        }
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -146,6 +203,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               <>
                 {/* Google Sign In */}
                 <button
+                  id="google-signin-button"
                   onClick={handleGoogleSignIn}
                   disabled={loading}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition mb-4"
@@ -202,18 +260,62 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                   
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-                      Email
+                        Email
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-dark-primary focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                        onChange={handleEmailChange}
+                        className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white dark:bg-dark-primary focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                            isGmail && mode === 'login'
+                            ? 'border-yellow-500 dark:border-yellow-500'
+                            : 'border-gray-300 dark:border-gray-700'
+                        }`}
                         required
-                      />
+                        />
                     </div>
+                    
+                    {/* Gmail Suggestion Message */}
+                    {isGmail && mode === 'login' && (
+                        <div className="mt-2 text-sm text-yellow-600 dark:text-yellow-400 flex items-center space-x-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>
+                            Looks like a Google email! Try{" "}
+                            <button
+                            type="button"
+                            onClick={handleGoogleSignIn}
+                            className="font-medium text-pink-600 dark:text-pink-400 hover:underline"
+                            >
+                            Sign in with Google
+                            </button>
+                            {" "}for a faster experience.
+                        </span>
+                        </div>
+                    )}
+                    
+                    {/* Sign-up specific suggestion */}
+                    {isGmail && mode === 'signup' && (
+                        <div className="mt-2 text-sm text-blue-600 dark:text-blue-400 flex items-center space-x-2">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>
+                                Using a Google email?{" "}
+                                <button
+                                type="button"
+                                onClick={handleGoogleSignIn}
+                                className="font-medium text-pink-600 dark:text-pink-400 hover:underline"
+                                >
+                                Sign up with Google
+                                </button>
+                                {" "}for a quicker setup.
+                            </span>
+                        </div>
+                    )}
                   </div>
                   
                   <div className="mb-6">
