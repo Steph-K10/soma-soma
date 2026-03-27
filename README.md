@@ -33,7 +33,7 @@
 - **Smart Email Detection** — Automatically detects Gmail addresses and suggests Google Sign-In for a smoother experience
 - **Session Management** — Automatic token refresh and secure session handling
 
-![Auth Flow Screenshot Placeholder](.github/screenshots/auth-flow.png)
+![Auth Flow](.github/screenshots/auth-flow.png)
 
 ### 👤 User Profile
 - Custom username selection
@@ -52,15 +52,15 @@
 - 📱 **Fully responsive** — Works seamlessly on desktop, tablet, and mobile
 - ♿ **Accessibility** — ARIA labels and keyboard navigation support
 
-![Dark Mode Screenshot Placeholder](.github/screenshots/dark-mode.png)
-![Light Mode Screenshot Placeholder](.github/screenshots/light-mode.png)
+![Dark Moder](.github/screenshots/dark-mode.png)
+![Light Mode](.github/screenshots/light-mode.png)
 
 ### 💡 Smart Features
 - **Gmail Detection** — When a user types a Gmail address, the system suggests using Google Sign-In for faster authentication
 - **Duplicate Prevention** — Prevents duplicate accounts and guides users to the correct sign-in method
 - **Protected Routes** — Dashboard and authenticated pages automatically redirect to login
 
-![Gmail Detection Screenshot Placeholder](.github/screenshots/gmail-detection.png)
+![Gmail Detection](.github/screenshots/gmail-detection.png)
 
 ---
 
@@ -74,17 +74,6 @@ Test credentials:
 
 Or sign up with your Google account to join the waitlist!
 
----
-
-## 📸 Screenshots
-
-| Landing Page | Dashboard | Auth Modal |
-|--------------|-----------|------------|
-| *Screenshot coming soon* | *Screenshot coming soon* | *Screenshot coming soon* |
-
-| Dark Mode | Gmail Detection | Profile Setup |
-|-----------|-----------------|---------------|
-| *Screenshot coming soon* | *Screenshot coming soon* | *Screenshot coming soon* |
 
 ---
 
@@ -113,30 +102,33 @@ Or sign up with your Google account to join the waitlist!
 ---
 
 ## 🏗️ Project Structure
+
+```
 soma-soma/
-├── frontend/ # React application
-│ ├── public/ # Static assets (favicons, etc.)
-│ ├── src/
-│ │ ├── components/ # Reusable UI components
-│ │ │ ├── Logo.jsx # SomaSoma brand logo
-│ │ │ └── AuthModal.jsx # Authentication modal
-│ │ ├── pages/ # Page components
-│ │ │ ├── LandingPage.jsx
-│ │ │ ├── Dashboard.jsx
-│ │ │ └── VerifyEmail.jsx
-│ │ ├── services/ # API and service integrations
-│ │ │ └── supabaseClient.js
-│ │ ├── App.jsx # Main app with routing
-│ │ ├── main.jsx # Entry point
-│ │ └── index.css # Global styles + Tailwind v4
-│ ├── .env.local # Environment variables (local)
-│ ├── index.html # HTML template
-│ ├── package.json # Dependencies
-│ └── vite.config.js # Vite configuration
-├── supabase/ # Supabase migrations
-│ └── migrations/ # Database migration files
-├── n8n-workflows/ # n8n automation workflows (future)
+├── frontend/                 # React application
+│   ├── public/               # Static assets (favicons, etc.)
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   │   ├── Logo.jsx      # SomaSoma brand logo
+│   │   │   └── AuthModal.jsx # Authentication modal
+│   │   ├── pages/            # Page components
+│   │   │   ├── LandingPage.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   └── VerifyEmail.jsx
+│   │   ├── services/         # API and service integrations
+│   │   │   └── supabaseClient.js
+│   │   ├── App.jsx           # Main app with routing
+│   │   ├── main.jsx          # Entry point
+│   │   └── index.css         # Global styles + Tailwind v4
+│   ├── .env.local            # Environment variables (local)
+│   ├── index.html            # HTML template
+│   ├── package.json          # Dependencies
+│   └── vite.config.js        # Vite configuration
+├── supabase/                 # Supabase migrations
+│   └── migrations/           # Database migration files
+├── n8n-workflows/            # n8n automation workflows (future)
 └── README.md
+```
 
 ---
 
@@ -223,7 +215,7 @@ Create a .env.local file in the frontend folder:
 
     ```
 
-###📧 Email Configuration
+### 📧 Email Configuration
 Supabase handles authentication emails (verification, password reset) with built-in templates. For production, consider configuring:
 
 - Custom SMTP — Use Resend, SendGrid, or AWS SES for branded emails
