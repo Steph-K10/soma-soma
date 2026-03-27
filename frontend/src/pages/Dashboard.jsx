@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Mail, Calendar, Brain, Users, Award, TrendingUp, MessageCircle, Sparkles } from 'lucide-react';
+import { LogOut, User, Mail, BookOpen, Briefcase, Target, Sparkles, Save, Edit2 } from 'lucide-react';
 import { supabase, getCurrentUser } from '../services/supabaseClient';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
@@ -9,16 +9,23 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    studyStreak: 0,
-    badgesEarned: 0,
-    studyGroups: 0,
-    aiSessions: 0
+  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState({
+    username: '',
+    learningPurpose: '',
+    specificGoal: ''
   });
+  const [saving, setSaving] = useState(false);
+
+  const learningPurposes = [
+    { value: 'school', label: 'School / University', icon: BookOpen },
+    { value: 'career', label: 'Career Development / Upskilling', icon: Briefcase },
+    { value: 'certification', label: 'Certification / Exam Prep', icon: Target },
+  ];
 
   useEffect(() => {
     checkUser();
-    fetchUserStats();
+    loadUserProfile();
   }, []);
 
   const checkUser = async () => {
@@ -37,34 +44,60 @@ const Dashboard = () => {
     }
   };
 
-  const fetchUserStats = async () => {
-    // This would fetch real data from your database
-    // For now, we'll use placeholder data
-    setStats({
-      studyStreak: 3,
-      badgesEarned: 2,
-      studyGroups: 1,
-      aiSessions: 12
-    });
+  const loadUserProfile = async () => {
+    try {
+      // Try to load existing profile from user_metadata
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.user_metadata) {
+        setProfile({
+          username: user.user_metadata.username || user.email?.split('@')[0] || '',
+          learningPurpose: user.user_metadata.learning_purpose || '',
+          specificGoal: user.user_metadata.specific_goal || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!profile.username.trim()) {
+      toast.error('Please enter a username');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          username: profile.username,
+          learning_purpose: profile.learningPurpose,
+          specific_goal: profile.specificGoal,
+          profile_completed: true
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success('Profile updated successfully!');
+      setIsEditing(false);
+    } catch (error) {
+      toast.error(error.message || 'Failed to update profile');
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleLogout = async () => {
     try {
-        console.log('Attempting to sign out...');
-        const { error } = await supabase.auth.signOut();
-        
-        if (error) {
-        console.error('SignOut error details:', error);
-        toast.error(`Logout failed: ${error.message}`);
-        return;
-        }
-        
-        console.log('Sign out successful');
-        toast.success('Logged out successfully');
-        navigate('/');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success('Logged out successfully');
+      navigate('/');
     } catch (error) {
-        console.error('Unexpected logout error:', error);
-        toast.error('Logout failed. Please try again.');
+      toast.error('Logout failed');
+      console.error(error);
     }
   };
 
@@ -76,19 +109,7 @@ const Dashboard = () => {
     );
   }
 
-  const statCards = [
-    { icon: TrendingUp, label: 'Study Streak', value: `${stats.studyStreak} days`, color: 'from-orange-500 to-red-500' },
-    { icon: Award, label: 'Badges Earned', value: stats.badgesEarned, color: 'from-yellow-500 to-amber-500' },
-    { icon: Users, label: 'Study Groups', value: stats.studyGroups, color: 'from-blue-500 to-cyan-500' },
-    { icon: Brain, label: 'AI Sessions', value: stats.aiSessions, color: 'from-purple-500 to-pink-500' },
-  ];
-
-  const recentActivities = [
-    { icon: Brain, title: 'AI Study Session', description: 'Reviewed Machine Learning concepts', time: '2 hours ago', color: 'text-purple-500' },
-    { icon: Users, title: 'Group Study', description: 'Joined "ML Study Group"', time: 'Yesterday', color: 'text-blue-500' },
-    { icon: Award, title: 'Badge Earned', description: 'Unlocked "Early Bird" badge', time: '3 days ago', color: 'text-yellow-500' },
-    { icon: MessageCircle, title: 'Telegram Reminder', description: 'Study plan generated for tomorrow', time: '5 days ago', color: 'text-green-500' },
-  ];
+  const isProfileComplete = profile.username && profile.learningPurpose;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-dark-primary dark:via-dark-secondary dark:to-dark-primary">
@@ -115,129 +136,153 @@ const Dashboard = () => {
       </nav>
       
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Welcome Section */}
-        <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-8 mb-8 border border-gray-200 dark:border-gray-800">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center">
-                <User className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">
-                  Welcome back, {user?.user_metadata?.username || user?.email?.split('@')[0]}!
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Ready to learn something new today? Your AI study partner is here to help.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30">
-              <Sparkles className="w-4 h-4 text-pink-500" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Day {stats.studyStreak} streak! 🔥</span>
-            </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Success Message */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 mb-6">
+            <Sparkles className="w-10 h-10 text-white" />
           </div>
+          <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-4">
+            You're In! 🎉
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            Thanks for joining the SomaSoma waitlist! We'll reach out when v1 is ready for early access.
+            Check back here for updates and sneak peeks.
+          </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {statCards.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={index}
-                className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all hover:-translate-y-1"
+        {/* Profile Setup Card */}
+        <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-display font-semibold text-gray-900 dark:text-white">
+                ✨ Complete Your Profile
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Help us personalize your learning journey
+              </p>
+            </div>
+            {!isEditing && isProfileComplete && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition"
               >
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center mb-4`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Two Column Layout */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Recent Activity */}
-          <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
-            <h2 className="text-xl font-display font-semibold mb-4 text-gray-900 dark:text-white">
-              Recent Activity
-            </h2>
-            <div className="space-y-4">
-              {recentActivities.map((activity, index) => {
-                const Icon = activity.icon;
-                return (
-                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                    <div className={`${activity.color}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900 dark:text-white">{activity.title}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{activity.description}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{activity.time}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                <Edit2 className="w-4 h-4" />
+                <span>Edit</span>
+              </button>
+            )}
           </div>
 
-          {/* Quick Actions */}
-          <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
-            <h2 className="text-xl font-display font-semibold mb-4 text-gray-900 dark:text-white">
-              Quick Actions
-            </h2>
-            <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg transition transform hover:scale-[1.02]">
-                <div className="flex items-center space-x-3">
-                  <Brain className="w-5 h-5" />
-                  <span className="font-medium">Start AI Study Session</span>
-                </div>
-                <span>→</span>
-              </button>
-              
-              <button className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                <div className="flex items-center space-x-3">
-                  <Users className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  <span className="font-medium text-gray-900 dark:text-white">Find Study Partners</span>
-                </div>
-                <span className="text-gray-500">→</span>
-              </button>
-              
-              <button className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  <span className="font-medium text-gray-900 dark:text-white">Generate Study Plan</span>
-                </div>
-                <span className="text-gray-500">→</span>
-              </button>
-              
-              <button className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                <div className="flex items-center space-x-3">
-                  <MessageCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  <span className="font-medium text-gray-900 dark:text-white">Connect Telegram Bot</span>
-                </div>
-                <span className="text-gray-500">→</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Coming Soon Banner */}
-        <div className="mt-8 bg-gradient-to-r from-pink-500/10 to-purple-500/10 dark:from-pink-500/5 dark:to-purple-500/5 rounded-2xl p-6 border border-pink-200 dark:border-pink-800/30">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center space-x-3">
-              <Sparkles className="w-6 h-6 text-pink-500" />
+          {isEditing || !isProfileComplete ? (
+            <div className="space-y-6">
+              {/* Username */}
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">More features coming soon!</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Study groups, badge system, and Telegram integration are on the way.</p>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Username *
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={profile.username}
+                    onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+                    placeholder="How should we call you?"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-dark-primary focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
               </div>
+
+              {/* Learning Purpose */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  I'm using SomaSoma for...
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {learningPurposes.map((purpose) => {
+                    const Icon = purpose.icon;
+                    const isSelected = profile.learningPurpose === purpose.value;
+                    return (
+                      <button
+                        key={purpose.value}
+                        onClick={() => setProfile({ ...profile, learningPurpose: purpose.value })}
+                        className={`flex items-center space-x-3 p-3 rounded-xl border transition-all ${
+                          isSelected
+                            ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20 ring-2 ring-pink-500'
+                            : 'border-gray-300 dark:border-gray-700 hover:border-pink-300'
+                        }`}
+                      >
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-pink-500' : 'text-gray-400'}`} />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{purpose.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Specific Goal */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  What are you studying for? (Optional)
+                </label>
+                <div className="relative">
+                  <Target className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={profile.specificGoal}
+                    onChange={(e) => setProfile({ ...profile, specificGoal: e.target.value })}
+                    placeholder="e.g., AWS Certification, Machine Learning, Data Structures..."
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-dark-primary focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving || !profile.username.trim()}
+                className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    <span>Save Profile</span>
+                  </>
+                )}
+              </button>
             </div>
-            <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm hover:shadow-lg transition">
-              Join Waitlist for Updates
-            </button>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4 p-4 bg-pink-50 dark:bg-pink-900/20 rounded-xl">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center">
+                  <User className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">{profile.username}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {learningPurposes.find(p => p.value === profile.learningPurpose)?.label || 'Learning journey'}
+                    {profile.specificGoal && ` • ${profile.specificGoal}`}
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                Thanks for sharing! We'll tailor your learning experience based on your goals.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Updates Card */}
+        <div className="mt-6 bg-gradient-to-r from-pink-500/10 to-purple-500/10 dark:from-pink-500/5 dark:to-purple-500/5 rounded-2xl p-6 border border-pink-200 dark:border-pink-800/30">
+          <div className="flex items-start space-x-4">
+            <Mail className="w-6 h-6 text-pink-500 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">What's next?</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                We'll notify you at <strong>{user?.email}</strong> when early access opens. 
+                In the meantime, follow us on social media for behind-the-scenes updates and learning tips!
+              </p>
+            </div>
           </div>
         </div>
       </div>
