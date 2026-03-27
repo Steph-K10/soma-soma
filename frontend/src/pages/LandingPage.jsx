@@ -145,7 +145,7 @@ const LandingPage = () => {
               </span>
               <br />
               <span className="text-gray-900 dark:text-white">
-                Together with AI
+                Get it right. Every time.
               </span>
             </h1>
             
