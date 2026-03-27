@@ -50,11 +50,21 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      toast.success('Logged out successfully');
-      navigate('/');
+        console.log('Attempting to sign out...');
+        const { error } = await supabase.auth.signOut();
+        
+        if (error) {
+        console.error('SignOut error details:', error);
+        toast.error(`Logout failed: ${error.message}`);
+        return;
+        }
+        
+        console.log('Sign out successful');
+        toast.success('Logged out successfully');
+        navigate('/');
     } catch (error) {
-      toast.error('Logout failed');
+        console.error('Unexpected logout error:', error);
+        toast.error('Logout failed. Please try again.');
     }
   };
 

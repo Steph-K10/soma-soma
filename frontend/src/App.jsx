@@ -1,17 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import VerifyEmail from './pages/VerifyEmail';
-import { supabase } from './services/supabaseClient';// Imported for the protected route check
+import { supabase } from './services/supabaseClient';
 
-
-// Protected Route Component - redirects to home if not authenticated
+// Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = React.useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   
-  React.useEffect(() => {
+  useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setIsAuthenticated(!!user);
@@ -30,17 +29,24 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/" replace />;
 };
 
-
 function App() {
-    useEffect(() => {
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  useEffect(() => {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log('Auth event:', event, session?.user?.email);
+        
         if (event === 'SIGNED_IN') {
-          console.log('User signed in:', session?.user?.email);
+          // Show success toast only
+          toast.success('Sign-in succesful');
+          // Let the ProtectedRoute handle navigation
         } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out');
+          toast.success('Logged out successfully');
         }
+        
+        setIsInitialized(true);
       }
     );
 
@@ -50,9 +56,16 @@ function App() {
     };
   }, []);
 
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+
   return (
     <Router>
-      {/* Toast notifications */}
       <Toaster 
         position="top-right"
         toastOptions={{
@@ -82,7 +95,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
-        
+
         {/* Protected Routes (require authentication) */}
         <Route 
           path="/dashboard" 
@@ -92,7 +105,7 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        
+
         {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
