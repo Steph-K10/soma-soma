@@ -181,12 +181,15 @@ Create a .env.local file in the frontend folder:
     -  http://localhost:5173
 
     -  https://soma-soma.vercel.app
+    
 
 5. Add authorized redirect URIs:
 
     -  http://localhost:5173/dashboard
 
     -  https://soma-soma.vercel.app/dashboard
+
+    -  https://soma-soma.vercel.app/verify-email
 
     -  https://your-project.supabase.co/auth/v1/callback
 
@@ -202,7 +205,7 @@ Create a .env.local file in the frontend folder:
 
     -  Site URL: https://soma-soma.vercel.app
 
-    -  Additional redirect URLs: https://soma-soma.vercel.app/dashboard
+    -  Additional redirect URLs: https://soma-soma.vercel.app/dashboard , https://soma-soma.vercel.app/verify-email
 
 ### Database Schema
     ```sql
