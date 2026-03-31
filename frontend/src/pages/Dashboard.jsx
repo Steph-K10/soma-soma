@@ -79,6 +79,24 @@ const Dashboard = () => {
 
       if (error) throw error;
 
+      //Send data to n8n webhook
+      const n8nResponse = await fetch('http://localhost:5678/webhook/profile-update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          email: user?.email,
+          username: profile.username,
+          learningPurpose: profile.learningPurpose,
+          specificGoal: profile.specificGoal,
+          authProvider: user?.app_metadata?.provider || 'email', // 'google' or 'email'
+          timestamp: new Date().toISOString()
+        })
+      });
+
+
       toast.success('Profile updated successfully!');
       setIsEditing(false);
     } catch (error) {
