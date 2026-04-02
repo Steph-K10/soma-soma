@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SomaSoma — V1 Launch Timeline Update</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #0F0F1A;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #E8E6F0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 32px 16px 48px;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #FF79C6 0%, #BD93F9 50%, #8BE9FD 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    /* ── Hero card ── */
+    .hero {
+      background: linear-gradient(135deg, #1E1B30 0%, #2A1040 50%, #1A2040 100%);
+      border: 1px solid rgba(189, 147, 249, 0.25);
+      border-radius: 20px;
+      padding: 48px 40px 40px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      display: inline-block;
+      background: rgba(189, 147, 249, 0.15);
+      border: 1px solid rgba(189, 147, 249, 0.35);
+      color: #BD93F9;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #F8F6FF;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: #A89FC0;
+      line-height: 1.7;
+      max-width: 440px;
+      margin: 0 auto 28px;
+    }
+
+    .launch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #FF79C6, #BD93F9);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 100px;
+      letter-spacing: 0.2px;
+    }
+
+    .launch-badge .dot {
+      width: 8px;
+      height: 8px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* ── Section heading ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #6C6880;
+      margin: 32px 0 16px;
+      padding-left: 4px;
+    }
+
+    /* ── Feature cards ── */
+    .feature {
+      background: #1A1828;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .icon-pink  { background: rgba(255, 121, 198, 0.12); }
+    .icon-purple { background: rgba(189, 147, 249, 0.12); }
+    .icon-cyan  { background: rgba(139, 233, 253, 0.12); }
+
+    .feature-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #F0EEF8;
+      margin-bottom: 5px;
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: #8A8499;
+      line-height: 1.6;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: #1A1828;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      margin: 24px 0;
+    }
+
+    .cta-section p {
+      font-size: 14px;
+      color: #8A8499;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #FF79C6, #BD93F9);
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px 32px;
+      border-radius: 100px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 24px 0 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      margin-top: 8px;
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: #4A4760;
+      line-height: 1.8;
+    }
+
+    .footer a {
+      color: #BD93F9;
+      text-decoration: none;
+    }
+
+    /* ── Light mode overrides ── */
+    @media (prefers-color-scheme: light) {
+      body { background-color: #F4F1FF; color: #1A1828; }
+      .hero { background: linear-gradient(135deg, #F0EBFF 0%, #EDE0FF 50%, #E8EEFF 100%); border-color: rgba(189,147,249,0.3); }
+      .hero h1 { color: #1A1828; }
+      .hero p { color: #5C5478; }
+      .feature { background: #fff; border-color: rgba(0,0,0,0.07); }
+      .feature-name { color: #1A1828; }
+      .feature-desc { color: #6A6280; }
+      .cta-section { background: #fff; border-color: rgba(0,0,0,0.07); }
+      .cta-section p { color: #6A6280; }
+      .footer p { color: #9A96B0; }
+      .section-label { color: #9A96B0; }
+      .icon-pink  { background: rgba(255, 121, 198, 0.1); }
+      .icon-purple { background: rgba(189, 147, 249, 0.1); }
+      .icon-cyan  { background: rgba(139, 233, 253, 0.15); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- Logo -->
+    <div class="topbar">
+      <span class="logo-text">SomaSoma</span>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="pill">V1 Launch Update</div>
+      <h1>We have a launch date.</h1>
+      <p>
+        Hey there! You joined the SomaSoma waitlist early, and we want to be the first to
+        tell you — V1 is almost here. Here's what's coming your way.
+      </p>
+      <div class="launch-badge">
+        <span class="dot"></span>
+        Launching {{15 May 2026}}
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="section-label">What's in V1</div>
+
+    <div class="feature">
+      <div class="feature-icon icon-pink">🤖</div>
+      <div>
+        <div class="feature-name">AI Study Partner</div>
+        <div class="feature-desc">
+          Your personal Feynman Technique coach — an AI-powered assistant that helps you
+          truly understand concepts by explaining them in your own words. Ask questions,
+          get smart summaries, and work through tough material at your own pace.
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon icon-purple">💬</div>
+      <div>
+        <div class="feature-name">Telegram Bot</div>
+        <div class="feature-desc">
+          Study without switching apps. Get daily study reminders, on-demand cheat sheets,
+          and quick summaries delivered straight to your Telegram. Your study companion
+          meets you where you already are.
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon icon-cyan">📊</div>
+      <div>
+        <div class="feature-name">Analytics &amp; Insights</div>
+        <div class="feature-desc">
+          Understand how you learn. Visual dashboards show your study patterns, weekly
+          progress reports highlight what's working, and an AI-powered recommendation
+          engine suggests what to focus on next.
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+      <p>
+        You're already on the list — you'll be among the very first to get access.<br/>
+        Keep an eye on your inbox for your early access invite.
+      </p>
+      <a href="{{https://soma-soma.vercel.app}}" class="cta-btn">Visit SomaSoma →</a>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>
+        You're receiving this because you joined the SomaSoma waitlist.<br/>
+        Questions? Find us on <a href="{{https://github.com/Steph-K10/soma-soma}}">GitHub</a> or reply to this email.<br/><br/>
+        © 2026 SomaSoma · Built with love in Nairobi
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
